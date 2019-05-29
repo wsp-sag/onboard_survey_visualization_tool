@@ -10,22 +10,22 @@ This tool was developed using R versions 3.4.3. The compatibility of the code wi
 
 ### Data Requirement
 
-For this tool to run properly, the survey data file needs to have the following fields:
-- **route_name** The name of the route that Surveyee was surveyed on. This needs to match **route_short_name** in GTFS __"routes.txt"__ file.
-- **direction** Direction of the route. Acceptable values are "Inbound" and "Outbound".
-- **origin_lon** Longitude of the origin location of the surveyed route.
-- **origin_lat** Latitude of the origin location of the surveyed route. 
-- **dest_lon** Longitude of the destination location of the surveyed route.
-- **dest_lat** Latitude of the destination location of the surveyed route.
-- **bding_lon** Longitude of the boarding location of the surveyed route.
-- **bding_lat** Latitude of the boarding location of the surveyed route. 
-- **alting_lon** Longitude of the alighting location of the surveyed route.
-- **alting_lat** Latitude of the alighting location of the surveyed route.
-- **origin_loc** __Optional.__ Origin location of the trip. Examples: Home, International Mall, Downtown Miami. 
-- **dest_loc** __Optional.__ Destination location of the trip. Example: Walmart, International Mall, Home. 
-- **all_routes** __Optional.__ All routes that were taken during this trip between trip origin and destination.
-- **access** __Optional.__ Access mode used to get from trip origin to the the first transit stop of the trip.
-- **egress** __Optional.__ Egress mode used to get from the last transit stop to the final destination.
+For this tool to run properly, the survey data file needs be a comma separated csv or text file. It should have the following fields:
+- **route_name** - The name of the route that Surveyee was surveyed on. This needs to match **route_short_name** in GTFS __"routes.txt"__ file.
+- **direction** - Direction of the route. Acceptable values are "Inbound" and "Outbound".
+- **origin_lon** - Longitude of the origin location of the surveyed route.
+- **origin_lat** - Latitude of the origin location of the surveyed route. 
+- **dest_lon** - Longitude of the destination location of the surveyed route.
+- **dest_lat** - Latitude of the destination location of the surveyed route.
+- **bding_lon** - Longitude of the boarding location of the surveyed route.
+- **bding_lat** - Latitude of the boarding location of the surveyed route. 
+- **alting_lon** - Longitude of the alighting location of the surveyed route.
+- **alting_lat** - Latitude of the alighting location of the surveyed route.
+- **origin_loc** _Optional._ - Origin location of the trip. Examples: Home, International Mall, Downtown Miami. 
+- **dest_loc** _Optional._ - Destination location of the trip. Example: Walmart, International Mall, Home. 
+- **all_routes** _Optional._ - All routes that were taken during this trip between trip origin and destination.
+- **access** _Optional._ - Access mode used to get from trip origin to the the first transit stop of the trip.
+- **egress** _Optional._ - Egress mode used to get from the last transit stop to the final destination.
 
-Please make sure all the coordinate fields are numeric, otherwise the shiny app might not run properly. The leaflet map in this tool has a base map. If the base map is not loaded correctly, please open the tool in browser.
+Please make sure all the coordinate fields are numeric, otherwise the shiny app might not run properly. The leaflet map in this tool has a base map. If the base map is not loaded correctly, please open the tool in browser. To use the sample data included in the _\data_ folder, please download [King County Metro GTFS data](http://transitfeeds.com/p/king-county-metro/73).
 
