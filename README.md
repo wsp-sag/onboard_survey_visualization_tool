@@ -29,3 +29,6 @@ For this tool to run properly, the survey data file needs be a comma separated c
 
 Please make sure all the coordinate fields are numeric, otherwise the shiny app might not run properly. The leaflet map in this tool has a base map. If the base map is not loaded correctly, please open the tool in browser. To use the sample data included in the _\data_ folder, please download [King County Metro GTFS data](http://transitfeeds.com/p/king-county-metro/73).
 
+### Contact Information
+
+Any suggestion or advice to this repository is welcome! The WSP member responsible for this repository is Dora Wu (j.wu@wsp.com). 
