@@ -1,13 +1,3 @@
-library(shiny)
-library(leaflet)
-library(dplyr)
-library(stringr)
-library(ggmap)
-library(rgdal)
-library(rgeos)
-library(shinyFiles)
-
-
 shinyServer(function(input, output, session) {
     
     # function to create customized markers for survey locations
@@ -36,11 +26,11 @@ shinyServer(function(input, output, session) {
         if (is.null(inFile)) return(NULL)
         
         obs_data <- read.csv(inFile$datapath, sep = ',', quote = '"',
-                            stringsAsFactors = F)
-                            
+                            stringsAsFactors = FALSE)
+                             
         # if optional columns do not exist in survey file, create columns with NAs
         # so the summary table can be shown properly                    
-        for (optional_column in c("origin_loc", "dest_loc", "access", "egress", "all_routes")) {
+        for (optional_column in c("origin_loc", "destination_loc", "access", "egress", "all_routes")) {
             if (!optional_column %in% colnames(obs_data)) {
                 obs_data$new_column = NA
                 colnames(obs_data)[ncol(obs_data)] <- optional_column
@@ -49,22 +39,27 @@ shinyServer(function(input, output, session) {
         
         # clean coordinate fields and convert NAs to zeros
         obs_data <- obs_data %>% 
-            mutate_at(vars(c(origin_lon, origin_lat, bding_lon, bding_lat,
-                             alting_lon, alting_lat, dest_lon, dest_lat)), 
+            mutate_at(vars(c(origin_lon, origin_lat, boarding_lon, boarding_lat,
+                             alighting_lon, alighting_lat, destination_lon, destination_lat)), 
                       funs(as.numeric(.))) %>% 
-            mutate_at(vars(c(origin_lon, origin_lat, bding_lon, bding_lat,
-                             alting_lon, alting_lat, dest_lon, dest_lat)), 
+            mutate_at(vars(c(origin_lon, origin_lat, boarding_lon, boarding_lat,
+                             alighting_lon, alighting_lat, destination_lon, destination_lat)), 
                       funs(ifelse(is.na(.), 0, .)))
                       
         # create flags to identify if record has missing coordinate data
-        # to be used in creating summary later              
-        obs_data$missing_origin <- ifelse(obs_data$origin_lon == 0, 1, 0)
-        obs_data$missing_dest   <- ifelse(obs_data$dest_lon   == 0, 1, 0)
-        obs_data$missing_bding  <- ifelse(obs_data$bding_lon  == 0, 1, 0)
-        obs_data$missing_alting <- ifelse(obs_data$alting_lon == 0, 1, 0)
+        # to be used in creating summary later
+        obs_data <- obs_data %>% 
+          mutate(missing_origin = if_else(origin_lon == 0, 1, 0),
+                 missing_dest   = if_else(destination_lon == 0, 1, 0),
+                 missing_bding  = if_else(boarding_lon == 0, 1, 0),
+                 missing_alting = if_else(alighting_lon == 0, 1, 0)) %>% 
         
         # records have coordinates for all four locations are valid
-        obs_data$valid <- !(obs_data$missing_origin | obs_data$missing_dest | obs_data$missing_bding | obs_data$missing_alting)
+        mutate(valid = if_else(missing_origin == 0 & 
+                                 missing_dest == 0 &
+                                 missing_bding == 0 &
+                                 missing_alting == 0, 
+                               TRUE, FALSE))
 
         return(obs_data)
     })
@@ -81,7 +76,7 @@ shinyServer(function(input, output, session) {
     
     # read in user-specified GTFS directory
     volumes <- getVolumes()
-    shinyDirChoose(input, 'gtfs_directory', roots=volumes, session=session)
+    shinyDirChoose(input, 'gtfs_directory', roots = volumes, session = session)
     gtfsDir <- reactive({
         return(print(parseDirPath(volumes, input$gtfs_directory)))
     })
@@ -129,7 +124,7 @@ shinyServer(function(input, output, session) {
         selected_stop_id_list <- unique(unlist(selected_stops$stop_id))
         
         route_stops <- gtfs_stops() %>% 
-            filter(stop_id%in%selected_stop_id_list) %>% 
+            filter(stop_id %in% selected_stop_id_list) %>% 
             select(stop_id, stop_name, stop_lon, stop_lat)
         
         stop_coords <- SpatialPoints(route_stops[, c("stop_lon", "stop_lat")])
@@ -140,42 +135,42 @@ shinyServer(function(input, output, session) {
     origin_pts <- reactive({
         
         survey_data() %>% 
-            filter(origin_lon != 0 & bding_lon != 0 & alting_lon != 0 & dest_lon != 0) %>% 
-            filter(origin_lon != -Inf & dest_lon != -Inf) %>% 
+            filter(origin_lon != 0 & boarding_lon != 0 & alighting_lon != 0 & destination_lon != 0) %>% 
+            filter(origin_lon != -Inf & destination_lon != -Inf) %>% 
             filter(route_name == input$selected_route & direction == input$selected_direction) %>% 
             filter(!is.na(origin_lon))
         
     })
     
     # get all boarding locations for selected route from survey
-    bding_pts <- reactive({
+    boarding_pts <- reactive({
         
         survey_data() %>% 
-            filter(origin_lon != 0 & bding_lon != 0 & alting_lon != 0 & dest_lon != 0) %>% 
-            filter(origin_lon != -Inf & dest_lon != -Inf) %>% 
+            filter(origin_lon != 0 & boarding_lon != 0 & alighting_lon != 0 & destination_lon != 0) %>% 
+            filter(origin_lon != -Inf & destination_lon != -Inf) %>% 
             filter(route_name == input$selected_route & direction == input$selected_direction) %>% 
-            filter(!is.na(bding_lon))
+            filter(!is.na(boarding_lon))
         
     })
     
     # get all alighting locations for selected route from survey
-    alting_pts <- reactive({
+    alighting_pts <- reactive({
         
         survey_data() %>% 
-            filter(origin_lon != 0 & bding_lon != 0 & alting_lon != 0 & dest_lon != 0) %>% 
-            filter(origin_lon != -Inf & dest_lon != -Inf) %>% 
+            filter(origin_lon != 0 & boarding_lon != 0 & alighting_lon != 0 & destination_lon != 0) %>% 
+            filter(origin_lon != -Inf & destination_lon != -Inf) %>% 
             filter(route_name == input$selected_route & direction == input$selected_direction) %>% 
-            filter(!is.na(alting_lon))
+            filter(!is.na(alighting_lon))
     })
     
     # get all destination locations for selected route from survey
     destination_pts <- reactive({
         
         survey_data() %>% 
-            filter(origin_lon != 0 & bding_lon != 0 & alting_lon != 0 & dest_lon != 0) %>% 
-            filter(origin_lon != -Inf & dest_lon != -Inf) %>% 
+            filter(origin_lon != 0 & boarding_lon != 0 & alighting_lon != 0 & destination_lon != 0) %>% 
+            filter(origin_lon != -Inf & destination_lon != -Inf) %>% 
             filter(route_name == input$selected_route & direction == input$selected_direction) %>% 
-            filter(!is.na(dest_lon))
+            filter(!is.na(destination_lon))
     })
     
     
@@ -192,7 +187,7 @@ shinyServer(function(input, output, session) {
         make_shapes <- function(colors, sizes, borders, shapes) {
             shapes <- gsub("circle", "; border-radius:50%", shapes)
             shapes <- gsub("square", "; border-radius:0%", shapes)
-            shapes <- gsub("cross", "&#10006", shapes)
+            shapes <- gsub("cross", "; &#10006", shapes)
             paste0(colors, "; width:", sizes, "px; height:", sizes, "px; border:3px solid ", 
                    borders, shapes)
         }
@@ -213,27 +208,28 @@ shinyServer(function(input, output, session) {
     # and GTFS route stops
     output$routemap <- renderLeaflet({
         leaflet() %>%
-            addProviderTiles('CartoDB.Positron',group='CartoDB') %>%
+            addProviderTiles('CartoDB.Positron', group = 'CartoDB') %>%
             addMarkers(data = route_pts(), ~stop_lon, ~stop_lat,
-                       icon = ~ icons(iconUrl = pchIcons(4, 10, 10, col="#009ACD", lwd = 2),
+                       icon = ~icons(iconUrl = pchIcons(4, 5, 5, col = "#009ACD", lwd = 2),
                                       popupAnchorX = 0, popupAnchorY = 0),
-                       label = ~stop_name) %>% 
-            addCircleMarkers(data = origin_pts(), lng = ~ origin_lon, lat = ~ origin_lat, 
-                             radius = 6, color="#CD6889", fillOpacity=0.5, stroke=FALSE, 
-                             label = ~ paste(as.character(index), origin_loc, sep = " "),
+                       label = ~stop_name
+            ) %>% # light blue
+            addCircleMarkers(data = origin_pts(), lng = ~origin_lon, lat = ~origin_lat, 
+                             radius = 6, color = "#CD6889", fillOpacity = 0.5, stroke = FALSE, 
+                             label = ~paste(as.character(index), origin_loc, sep = " "),
                              layerId = ~index, group = "Origin"
             ) %>%  # pink
-            addCircleMarkers(data = bding_pts(), lng = ~ bding_lon, lat = ~ bding_lat, 
-                             radius = 6, color="#EEC900", fillOpacity=0.5, stroke=FALSE, 
-                             label = ~ as.character(index), layerId = ~index, group = "Boarding"
+            addCircleMarkers(data = boarding_pts(), lng = ~boarding_lon, lat = ~boarding_lat, 
+                             radius = 6, color = "#EEC900", fillOpacity = 0.5, stroke = FALSE, 
+                             label = ~as.character(index), layerId = ~index, group = "Boarding"
             ) %>%  # yellow
-            addCircleMarkers(data = alting_pts(), lng = ~ alting_lon, lat = ~ alting_lat, 
-                             radius = 6, color="#43CD80", fillOpacity=0.5, stroke=FALSE, 
-                             label = ~ as.character(index), layerId = ~index, group = "Alighting"
+            addCircleMarkers(data = alighting_pts(), lng = ~alighting_lon, lat = ~alighting_lat, 
+                             radius = 6, color = "#43CD80", fillOpacity = 0.5, stroke = FALSE, 
+                             label = ~as.character(index), layerId = ~index, group = "Alighting"
             ) %>%  # green
-            addCircleMarkers(data = destination_pts(), lng = ~ dest_lon, lat = ~ dest_lat, 
-                             radius = 6, color="#27408B", fillOpacity=0.5, stroke=FALSE, 
-                             label = ~ paste(as.character(index), dest_loc, sep=" "),
+            addCircleMarkers(data = destination_pts(), lng = ~destination_lon, lat = ~destination_lat, 
+                             radius = 6, color = "#27408B", fillOpacity = 0.5, stroke = FALSE, 
+                             label = ~paste(as.character(index), destination_loc, sep = " "),
                              layerId = ~index, group = "Destination"
             ) %>%  # blue
             addLayersControl(baseGroups = c( "CartoDB"),
@@ -261,21 +257,21 @@ shinyServer(function(input, output, session) {
         
         p <- input$routemap_marker_click$id
         proxy <- leafletProxy("routemap")
-        
-        selected_record <- survey_data() %>% 
-            filter(origin_lon != 0 & bding_lon != 0 & alting_lon != 0 & dest_lon != 0) %>% 
-            filter(origin_lon != -Inf & dest_lon != -Inf) %>% 
+
+        selected_record <- survey_data() %>%
+            filter(origin_lon != 0 & boarding_lon != 0 & alighting_lon != 0 & destination_lon != 0) %>%
+            filter(origin_lon != -Inf & destination_lon != -Inf) %>%
             filter(index == p)
-        
-        proxy %>% 
-            hiliMarker(selected_record$origin_lon, selected_record$origin_lat, 
-                             "#CD6889", layerid = "slo") %>% 
-            hiliMarker(selected_record$dest_lon, selected_record$dest_lat, 
+
+        proxy %>%
+            hiliMarker(selected_record$origin_lon, selected_record$origin_lat,
+                             "#CD6889", layerid = "slo") %>%
+            hiliMarker(selected_record$destination_lon, selected_record$destination_lat,
                        "#27408B", layerid = "sld") %>%
-            hiliMarker(selected_record$bding_lon, selected_record$bding_lat, 
-                       "#EEC900", layerid = "slb") %>% 
-            hiliMarker(selected_record$alting_lon, selected_record$alting_lat, 
-                       "#43CD80", layerid = "sla") 
+            hiliMarker(selected_record$boarding_lon, selected_record$boarding_lat,
+                       "#EEC900", layerid = "slb") %>%
+            hiliMarker(selected_record$alighting_lon, selected_record$alighting_lat,
+                       "#43CD80", layerid = "sla")
         
         
     })
@@ -295,8 +291,8 @@ shinyServer(function(input, output, session) {
     selected_record <- reactive({ 
         
         survey_data() %>% 
-            filter(origin_lon != 0 & bding_lon != 0 & alting_lon != 0 & dest_lon != 0) %>% 
-            filter(origin_lon != -Inf & dest_lon != -Inf) %>% 
+            filter(origin_lon != 0 & boarding_lon != 0 & alighting_lon != 0 & destination_lon != 0) %>% 
+            filter(origin_lon != -Inf & destination_lon != -Inf) %>% 
             filter(index == id1()) 
         
         })
@@ -304,7 +300,7 @@ shinyServer(function(input, output, session) {
     # get additional information of the selected record
     output$record_index    <- renderText({paste("Index of record selected: ", id1())})
     output$origin_location <- renderText({paste("Origin Location:", selected_record()$origin_loc)})
-    output$dest_location   <- renderText({paste("Destination Location:", selected_record()$dest_loc)})
+    output$destination_location   <- renderText({paste("Destination Location:", selected_record()$destination_loc)})
     output$access_mode     <- renderText({paste("Access Mode:", selected_record()$access)})
     output$egress_mode     <- renderText({paste("Egress Mode:", selected_record()$egress)})
     output$route_taken     <- renderText({paste("Bus Routes Taken:", selected_record()$all_routes)})
