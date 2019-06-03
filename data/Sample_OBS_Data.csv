@@ -1,4 +1,4 @@
-index,route_name,direction,origin_loc,dest_loc,all_routes,origin_lon,origin_lat,bding_lon,bding_lat,alting_lon,alting_lat,dest_lon,dest_lat,access,egress,badRecord
+index,route_name,direction,origin_loc,dest_loc,all_routes,origin_lon,origin_lat,boarding_lon,boarding_lat,alighting_lon,alighting_lat,destination_lon,destination_lat,access,egress,badRecord
 1,13,Inbound,Seattle Pacific Unversity,Seattle Art Museum,13,-122.362396,47.650176,-122.361017,47.648886,-122.336484,47.608149,-122.338131,47.607346,walk,walk,FALSE
 2,13,Inbound,Pacific Science Center,Downtown,13,-122.351131,47.619875,-122.352038,47.618512,-122.333809,47.605238,-122.333701,47.606189,walk,walk,FALSE
 3,13,Inbound,Trader Joe's,Downtown,13,-122.356669,47.636986,-122.357061,47.636889,-122.348711,47.616917,-122.348432,47.617279,walk,walk,FALSE
