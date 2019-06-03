@@ -28,7 +28,7 @@ For this tool to run properly, the survey data file needs be a comma separated c
 - **access** _Optional._            - Access mode used to get from trip origin to the the first transit stop of the trip.
 - **egress** _Optional._            - Egress mode used to get from the last transit stop to the final destination.
 
-Please make sure all the coordinate fields are numeric, otherwise the shiny app might not run properly. The leaflet map in this tool has a base map. If the base map is not loaded correctly, please open the tool in browser. To use the sample data included in the _\data_ folder, please download [King County Metro GTFS data](http://transitfeeds.com/p/king-county-metro/73).
+Please make sure all the coordinate fields are numeric, otherwise the shiny app might not run properly. The leaflet map in this tool has a base map. If the base map is not loaded correctly, please open the tool in browser. Sample survey data and GTFS data are included in the _\data_ folder. GTFS data will need to be unzipped for the use in this tool.
 
 ### Contributing
 
