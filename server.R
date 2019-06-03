@@ -68,7 +68,7 @@ shinyServer(function(input, output, session) {
     
     # update drop down selection list using survey data
     observe({
-        route_list <- unique(survey_data()[, c("route_name")])
+        route_list <- unique(survey_data()[, c("gtfs_route_short_name")])
         route_direction <- unique(survey_data()[, c("direction")])
         updateSelectInput(session, "selected_route", choices = route_list)
         updateSelectInput(session, "selected_direction", choices = route_direction)
@@ -137,7 +137,7 @@ shinyServer(function(input, output, session) {
         survey_data() %>% 
             filter(origin_lon != 0 & boarding_lon != 0 & alighting_lon != 0 & destination_lon != 0) %>% 
             filter(origin_lon != -Inf & destination_lon != -Inf) %>% 
-            filter(route_name == input$selected_route & direction == input$selected_direction) %>% 
+            filter(gtfs_route_short_name == input$selected_route & direction == input$selected_direction) %>% 
             filter(!is.na(origin_lon))
         
     })
@@ -148,7 +148,7 @@ shinyServer(function(input, output, session) {
         survey_data() %>% 
             filter(origin_lon != 0 & boarding_lon != 0 & alighting_lon != 0 & destination_lon != 0) %>% 
             filter(origin_lon != -Inf & destination_lon != -Inf) %>% 
-            filter(route_name == input$selected_route & direction == input$selected_direction) %>% 
+            filter(gtfs_route_short_name == input$selected_route & direction == input$selected_direction) %>% 
             filter(!is.na(boarding_lon))
         
     })
@@ -159,7 +159,7 @@ shinyServer(function(input, output, session) {
         survey_data() %>% 
             filter(origin_lon != 0 & boarding_lon != 0 & alighting_lon != 0 & destination_lon != 0) %>% 
             filter(origin_lon != -Inf & destination_lon != -Inf) %>% 
-            filter(route_name == input$selected_route & direction == input$selected_direction) %>% 
+            filter(gtfs_route_short_name == input$selected_route & direction == input$selected_direction) %>% 
             filter(!is.na(alighting_lon))
     })
     
@@ -169,7 +169,7 @@ shinyServer(function(input, output, session) {
         survey_data() %>% 
             filter(origin_lon != 0 & boarding_lon != 0 & alighting_lon != 0 & destination_lon != 0) %>% 
             filter(origin_lon != -Inf & destination_lon != -Inf) %>% 
-            filter(route_name == input$selected_route & direction == input$selected_direction) %>% 
+            filter(gtfs_route_short_name == input$selected_route & direction == input$selected_direction) %>% 
             filter(!is.na(destination_lon))
     })
     
@@ -321,7 +321,7 @@ shinyServer(function(input, output, session) {
                                      "Valid Records"), stringsAsFactors = FALSE)
         
         route_record <- survey_data() %>% 
-            filter(route_name == input$selected_route)
+            filter(gtfs_route_short_name == input$selected_route)
         num_of_record <- aggregate(index ~ direction, data = route_record, length)
         route_summary <- aggregate(cbind(missing_origin, missing_dest, missing_bding, 
                                          missing_alting, valid) ~ direction,
