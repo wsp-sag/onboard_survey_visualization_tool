@@ -6,7 +6,7 @@ This tool was created to assist in validating the accuracy and usability of repo
 
 ### Software Requirement
 
-This tool was developed using R versions 3.4.3. The compatibility of the code with other versions of R have not been tested.
+To run this Shiny app, please download R Studio, open either "server.R" or "ui.R" in R Studio, and click "Run App". This tool has been tested with R version 3.4.3 and 3.5.1.
 
 ### Data Requirement
 
@@ -29,6 +29,10 @@ For this tool to run properly, the survey data file needs be a comma separated c
 
 Please make sure all the coordinate fields are numeric, otherwise the shiny app might not run properly. The leaflet map in this tool has a base map. If the base map is not loaded correctly, please open the tool in browser. To use the sample data included in the _\data_ folder, please download [King County Metro GTFS data](http://transitfeeds.com/p/king-county-metro/73).
 
+### Contributing
+
+Pull requests and suggestions are welcome. Please open an issue first to discuss what you would like to change.
+
 ### Contact Information
 
-Any suggestion or advice to this repository is welcome! The WSP member responsible for this repository is Dora Wu (j.wu@wsp.com). 
+The WSP member responsible for this repository is Dora Wu (j.wu@wsp.com). 
